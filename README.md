@@ -1,0 +1,1 @@
+A small script that uses cv2 resize to allow you to zoom into jpegs

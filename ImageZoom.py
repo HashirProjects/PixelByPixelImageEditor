@@ -25,9 +25,35 @@ class ChangeSize():
 
 		return newImg
 
-resizer=ChangeSize(imgLowRes)
 
-newImg = resizer.zoom(10,10,900,200,800)
+def getMousePostion(img):
 
-cv2.imshow("hello",newImg)
-cv2.waitKey(0)
+	def onClick(event,x,y,flags,param):
+		if event == cv2.EVENT_LBUTTONDBLCLK:
+			param.append((x,y))
+			if len(param) > 2:
+				param.pop(0)
+
+	coorList=[]
+
+	cv2.namedWindow('image')
+	cv2.setMouseCallback('image',onClick,coorList)
+
+	while True:
+		
+		cv2.imshow('image',img)
+		k = cv2.waitKey(0) & 0xFF
+		if k == ord('a'):
+			resizer = ChangeSize(img)
+			newImg = resizer.zoom(coorList[0][0],coorList[0][1],coorList[1][0],coorList[1][1],800)
+
+			cv2.namedWindow('image')
+			cv2.setMouseCallback('image',onClick,coorList)
+			cv2.imshow("image", newImg)
+
+			img = newImg
+		elif k == 27:
+			break
+
+
+getMousePostion(img)
