@@ -3,9 +3,7 @@ import numpy as np
 import time
 
 img = cv2.imread("testImage.jpg")
-imgLowRes = cv2.resize(img, (50,50))
-
-print(type(imgLowRes))
+imgLowRes = cv2.resize(img, (1000,1000))
 
 class ChangeSize():
 	def __init__(self, oldImg):
@@ -13,71 +11,23 @@ class ChangeSize():
 		self.oldX, self.oldY, self.oldZ = np.shape(oldImg)
 
 
-	def imgZoom(self, multiplier):
+	def zoom(self, x1, y1, x2, y2, windowSize):
 
-		newImg = np.zeros((self.oldX*multiplier, self.oldY * multiplier, self.oldZ), dtype="uint8")
-		currentColumnPosition = 0
+		ImgYsubbed = self.oldImg[y1:y2]
+		newImg = np.zeros((y2-y1,x2-x1,self.oldZ),dtype="uint8")
 
-		for column in self.oldImg:
-			
-			newColumn= np.zeros((self.oldY*multiplier, self.oldZ), dtype="uint8")
-			currentPixelPosition = 0
+		for i in range(y2-y1):
+			newImg[i] = ImgYsubbed[i][x1:x2]
 
-			for pixel in column:
-				for i in range(multiplier):
+		ratio = (y2-y1)/(x2-x1)
 
-					for i in range(self.oldZ):
-						newColumn[currentPixelPosition][i]=pixel[i]
-
-					currentPixelPosition += 1
-
-			for i in range(multiplier):
-
-				for i in range(self.oldY * multiplier):
-					newImg[currentColumnPosition][i] = newColumn[i]
-
-				currentColumnPosition += 1
+		newImg = cv2.resize(newImg, (windowSize,int(windowSize*ratio)), interpolation = cv2.INTER_NEAREST)
 
 		return newImg
 
-	def defSize(self, X, Y):
-
-		newImg = np.zeros((X,Y,self.oldZ),dtype="uint8")
-		currentColumnPosition = 0
-
-		multiplierX = int(X/self.oldX)
-		multiplierY = int(Y/self.oldY)
-
-		for column in self.oldImg:
-			
-			newColumn = np.zeros((Y,self.oldZ),dtype="uint8")
-			currentPixelPosition = 0
-
-			for pixel in column:
-				for i in range(multiplierY):
-
-					for i in range(self.oldZ):
-						newColumn[currentPixelPosition][i]=pixel[i]
-
-					currentPixelPosition += 1
-
-			for i in range(multiplierX):
-
-				for i in range(Y):
-					newImg[currentColumnPosition][i] = newColumn[i]
-
-				currentColumnPosition += 1
-
-		return newImg		
-
-
-
-
 resizer=ChangeSize(imgLowRes)
 
-newImg = resizer.defSize(1000,1000)
-
-print(newImg, np.shape(newImg))
+newImg = resizer.zoom(10,10,900,200,800)
 
 cv2.imshow("hello",newImg)
 cv2.waitKey(0)
