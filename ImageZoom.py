@@ -11,7 +11,7 @@ class ChangeSize():
 		self.oldX, self.oldY, self.oldZ = np.shape(oldImg)
 
 
-	def zoom(self, x1, y1, x2, y2, windowSize):
+	def zoom(self, x1, y1, x2, y2, windowSizeX, windowSizeY = None):
 
 		ImgYsubbed = self.oldImg[y1:y2]
 		newImg = np.zeros((y2-y1,x2-x1,self.oldZ),dtype="uint8")
@@ -20,25 +20,34 @@ class ChangeSize():
 			newImg[i] = ImgYsubbed[i][x1:x2]
 
 		ratio = (y2-y1)/(x2-x1)
+		windowSizeY = int(windowSizeX*ratio)
 
-		newImg = cv2.resize(newImg, (windowSize,int(windowSize*ratio)), interpolation = cv2.INTER_NEAREST)
+		newImg = cv2.resize(newImg, (windowSizeX,windowSizeY), interpolation = cv2.INTER_NEAREST)
 
-		return newImg
+		return newImg, (windowSizeX,windowSizeY)
 
 
 def getMousePostion(img):
 
 	def onClick(event,x,y,flags,param):
 		if event == cv2.EVENT_LBUTTONDBLCLK:
-			param[0].append((x,y))
-			if len(param[0]) > 2:
-				param[0].pop(0)
+			param.append((x,y))
+			if len(param) > 2:
+				param.pop(0)
+
+	def onClickZoomed(event,x,y,flags,param):
+		if event == cv2.EVENT_LBUTTONDBLCLK:
+			param.append((x,y))
+			if len(param) > 2:
+				param.pop(0)
 
 	coorList=[]
+	coorListZoomed=[]
 	currentZoom = [(0,0),(1000,1000)]
 
 	cv2.namedWindow('image')
-	cv2.setMouseCallback('image',onClick,[coorList,currentZoom])
+	cv2.setMouseCallback('image',onClick,coorList)
+	resizer = ChangeSize(img)
 
 	while True:
 
@@ -47,11 +56,32 @@ def getMousePostion(img):
 		k = cv2.waitKey(0) & 0xFF
 
 		if k == ord('a'):
-			resizer = ChangeSize(img)
-			newimg = resizer.zoom(coorList[0][0],coorList[0][1],coorList[1][0],coorList[1][1],800)
+			currentZoom = coorList
 
-			#cv2.destroyWindow("image")
+			newimg, windowSize = resizer.zoom(coorList[0][0],coorList[0][1],coorList[1][0],coorList[1][1],800)
+
+			cv2.namedWindow("new image")
+			cv2.setMouseCallback('new image',onClick,coorListZoomed)
 			cv2.imshow("new image", newimg)
+
+		elif k == ord('s'):
+
+
+			xDiff = currentZoom[0][0] - currentZoom[1][0]
+			yDiff = currentZoom[0][1] - currentZoom[1][1]
+
+
+			coorList[0] = (currentZoom[0][0] + int((coorListZoomed[0][0]* xDiff)/windowSize[0]), currentZoom[0][1] + int((coorListZoomed[0][1]* xDiff)/windowSize[0]))
+			coorList[1] = (currentZoom[1][0] + int((coorListZoomed[1][0]* yDiff)/windowSize[1]), currentZoom[1][1] + int((coorListZoomed[1][1]* yDiff)/windowSize[1]))
+			
+			newimg, windowSize = resizer.zoom(coorList[0][0],coorList[0][1],coorList[1][0],coorList[1][1],800)
+
+			cv2.namedWindow("new image")
+			cv2.setMouseCallback('new image',onClick,coorListZoomed)
+			cv2.imshow("new image", newimg)
+
+			currentZoom = coorList
+
 
 		elif k == 27:
 			break
