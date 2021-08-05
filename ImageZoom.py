@@ -30,28 +30,29 @@ def getMousePostion(img):
 
 	def onClick(event,x,y,flags,param):
 		if event == cv2.EVENT_LBUTTONDBLCLK:
-			param.append((x,y))
-			if len(param) > 2:
-				param.pop(0)
+			param[0].append((x,y))
+			if len(param[0]) > 2:
+				param[0].pop(0)
 
 	coorList=[]
+	currentZoom = [(0,0),(1000,1000)]
 
 	cv2.namedWindow('image')
-	cv2.setMouseCallback('image',onClick,coorList)
+	cv2.setMouseCallback('image',onClick,[coorList,currentZoom])
 
 	while True:
-		
-		cv2.imshow('image',img)
+
+		cv2.imshow('image',img)# this will always show the same img
+
 		k = cv2.waitKey(0) & 0xFF
+
 		if k == ord('a'):
 			resizer = ChangeSize(img)
-			newImg = resizer.zoom(coorList[0][0],coorList[0][1],coorList[1][0],coorList[1][1],800)
+			newimg = resizer.zoom(coorList[0][0],coorList[0][1],coorList[1][0],coorList[1][1],800)
 
-			cv2.namedWindow('image')
-			cv2.setMouseCallback('image',onClick,coorList)
-			cv2.imshow("image", newImg)
+			#cv2.destroyWindow("image")
+			cv2.imshow("new image", newimg)
 
-			img = newImg
 		elif k == 27:
 			break
 
