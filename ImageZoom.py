@@ -27,7 +27,7 @@ class ChangeSize():
 		return newImg, (windowSizeX,windowSizeY)
 
 
-def getMousePostion(img):
+def main(img):
 
 	def onClick(event,x,y,flags,param):
 		if event == cv2.EVENT_LBUTTONDBLCLK:
@@ -35,11 +35,11 @@ def getMousePostion(img):
 			if len(param) > 2:
 				param.pop(0)
 
-	def onClickZoomed(event,x,y,flags,param):
-		if event == cv2.EVENT_LBUTTONDBLCLK:
-			param.append((x,y))
-			if len(param) > 2:
-				param.pop(0)
+	def findOriginalCoor(windowSize, origin, segmentSize, point):
+		X = origin[0] + (point[0] * segmentSize[0]) /windowSize[0]
+		Y = origin[1] + (point[1] * segmentSize[1]) /windowSize[1] 
+
+		return int(X),int(Y)
 
 	coorList=[]
 	coorListZoomed=[]
@@ -47,37 +47,48 @@ def getMousePostion(img):
 
 	cv2.namedWindow('image')
 	cv2.setMouseCallback('image',onClick,coorList)
+
+	cv2.namedWindow("new image")
+	cv2.setMouseCallback('new image',onClick,coorListZoomed)
+
 	resizer = ChangeSize(img)
 
-	while True:
+	cv2.imshow('image',img)# this window will always show the same img
 
-		cv2.imshow('image',img)# this will always show the same img
+	while True:
 
 		k = cv2.waitKey(0) & 0xFF
 
 		if k == ord('a'):
 			currentZoom = coorList
+			print (coorList)
 
 			newimg, windowSize = resizer.zoom(coorList[0][0],coorList[0][1],coorList[1][0],coorList[1][1],800)
 
-			cv2.namedWindow("new image")
-			cv2.setMouseCallback('new image',onClick,coorListZoomed)
 			cv2.imshow("new image", newimg)
 
 		elif k == ord('s'):
 
+			print(coorListZoomed)
 
-			xDiff = currentZoom[0][0] - currentZoom[1][0]
-			yDiff = currentZoom[0][1] - currentZoom[1][1]
+			xDiff = currentZoom[1][0] - currentZoom[0][0]
+			yDiff = currentZoom[1][1] - currentZoom[0][1]
+
+			segmentSize = (xDiff,yDiff)
+
+			print(f"x dif  {xDiff}")
+			print(f"y dif  {yDiff}")
 
 
-			coorList[0] = (currentZoom[0][0] + int((coorListZoomed[0][0]* xDiff)/windowSize[0]), currentZoom[0][1] + int((coorListZoomed[0][1]* xDiff)/windowSize[0]))
-			coorList[1] = (currentZoom[1][0] + int((coorListZoomed[1][0]* yDiff)/windowSize[1]), currentZoom[1][1] + int((coorListZoomed[1][1]* yDiff)/windowSize[1]))
+			#coorList[0] = (currentZoom[0][0] + int((coorListZoomed[0][0]* xDiff)/windowSize[0]), currentZoom[0][1] + int((coorListZoomed[0][1]* yDiff)/windowSize[1]))
+			#coorList[1] = (currentZoom[0][0] + int((coorListZoomed[1][0]* xDiff)/windowSize[0]), currentZoom[0][1] + int((coorListZoomed[1][1]* yDiff)/windowSize[1]))
 			
+			coorList[0]=findOriginalCoor(windowSize,currentZoom[0],segmentSize,coorListZoomed[0])
+			coorList[1]=findOriginalCoor(windowSize,currentZoom[0],segmentSize,coorListZoomed[1])
+
+			print(coorList)
 			newimg, windowSize = resizer.zoom(coorList[0][0],coorList[0][1],coorList[1][0],coorList[1][1],800)
 
-			cv2.namedWindow("new image")
-			cv2.setMouseCallback('new image',onClick,coorListZoomed)
 			cv2.imshow("new image", newimg)
 
 			currentZoom = coorList
@@ -86,5 +97,24 @@ def getMousePostion(img):
 		elif k == 27:
 			break
 
+		elif k == ord('d'):
+			print(f"coor list {coorList}")
+			print(f"coor list zoomed {coorListZoomed}")
 
-getMousePostion(img)
+		elif k == ord('f'):
+
+			xDiff = currentZoom[1][0] - currentZoom[0][0]
+			yDiff = currentZoom[1][1] - currentZoom[0][1]
+
+			segmentSize = (xDiff,yDiff)
+
+			pixl = findOriginalCoor(windowSize, currentZoom[0],segmentSize,coorListZoomed[1])
+			print(pixl)
+
+			img[pixl[1]][pixl[0]]= [0,0,0]
+
+
+			cv2.imshow("image",img)
+			resizer = ChangeSize(img)
+
+main(img)
