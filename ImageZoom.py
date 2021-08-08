@@ -72,16 +72,16 @@ def main(img):
 			yDiff = currentZoom[1][1] - currentZoom[0][1]
 
 			segmentSize = (xDiff,yDiff)
+			points = [(),()]
 
-			coorList[0]=findOriginalCoor(windowSize,currentZoom[0],segmentSize,coorListZoomed[0])
-			coorList[1]=findOriginalCoor(windowSize,currentZoom[0],segmentSize,coorListZoomed[1])
+			points[0]=findOriginalCoor(windowSize,currentZoom[0],segmentSize,coorListZoomed[0])
+			points[1]=findOriginalCoor(windowSize, currentZoom[0],segmentSize,coorListZoomed[1])
 
-			print(coorList)
-			newimg, windowSize = resizer.zoom(coorList[0][0],coorList[0][1],coorList[1][0],coorList[1][1],800)
+			newimg, windowSize = resizer.zoom(points[0][0],points[0][1],points[1][0],points[1][1],800)
 
 			cv2.imshow("new image", newimg)
 
-			currentZoom = coorList
+			currentZoom = points
 
 		elif k == ord('d'):
 			print(f"coor list {coorList}")
