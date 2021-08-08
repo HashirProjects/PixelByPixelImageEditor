@@ -61,7 +61,6 @@ def main(img):
 
 		if k == ord('a'):
 			currentZoom = coorList
-			print (coorList)
 
 			newimg, windowSize = resizer.zoom(coorList[0][0],coorList[0][1],coorList[1][0],coorList[1][1],800)
 
@@ -69,20 +68,11 @@ def main(img):
 
 		elif k == ord('s'):
 
-			print(coorListZoomed)
-
 			xDiff = currentZoom[1][0] - currentZoom[0][0]
 			yDiff = currentZoom[1][1] - currentZoom[0][1]
 
 			segmentSize = (xDiff,yDiff)
 
-			print(f"x dif  {xDiff}")
-			print(f"y dif  {yDiff}")
-
-
-			#coorList[0] = (currentZoom[0][0] + int((coorListZoomed[0][0]* xDiff)/windowSize[0]), currentZoom[0][1] + int((coorListZoomed[0][1]* yDiff)/windowSize[1]))
-			#coorList[1] = (currentZoom[0][0] + int((coorListZoomed[1][0]* xDiff)/windowSize[0]), currentZoom[0][1] + int((coorListZoomed[1][1]* yDiff)/windowSize[1]))
-			
 			coorList[0]=findOriginalCoor(windowSize,currentZoom[0],segmentSize,coorListZoomed[0])
 			coorList[1]=findOriginalCoor(windowSize,currentZoom[0],segmentSize,coorListZoomed[1])
 
@@ -92,10 +82,6 @@ def main(img):
 			cv2.imshow("new image", newimg)
 
 			currentZoom = coorList
-
-
-		elif k == 27:
-			break
 
 		elif k == ord('d'):
 			print(f"coor list {coorList}")
@@ -116,5 +102,14 @@ def main(img):
 
 			cv2.imshow("image",img)
 			resizer = ChangeSize(img)
+
+			currentZoom = coorList
+
+			newimg, windowSize = resizer.zoom(coorList[0][0],coorList[0][1],coorList[1][0],coorList[1][1],800)
+
+			cv2.imshow("new image", newimg)
+
+		elif k == 27:
+			break
 
 main(img)
