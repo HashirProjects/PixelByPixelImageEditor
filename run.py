@@ -1,8 +1,8 @@
 from src.CommandParser import CommandParser
 
 if __name__ == "__main__":
-    print("Welcome Message")
-    parser = CommandParser(command_executor)
+    print("Welcome to the pixel image editor! type HELP for a list of commands")
+    parser = CommandParser()
     while True:
         command = input("> ")
         if command.upper() == "EXIT":
@@ -11,4 +11,4 @@ if __name__ == "__main__":
             parser.execute_command(command.split())
         except Exception as e:
             print(e)
-    print("Exit Message")
+    print("Exited successfully.")

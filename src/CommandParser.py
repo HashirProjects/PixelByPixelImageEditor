@@ -1,10 +1,12 @@
 """A command parser class."""
+from src.EditImage import EditImage
 
 class CommandParser:
     """A class used to parse and execute a user Command."""
-
-    def __init__(self, command_executor):
-        self.command_executor = command_executor
+    def __init__(self):
+        self.imgPath = ""
+        self.colour = [0,0,0]
+        self.imgEditor = None
 
     def execute_command(self, command):
         """
@@ -13,18 +15,33 @@ class CommandParser:
         """
         try:
 
-            if command[0].upper() == "COMMAND1":
-                self.command_executor.command1()
+            if command[0].upper() == "RUN":
+                if self.imgPath == "":
+                    raise Exception("Insufficient parameters entered for this action: Please enter image path")
 
-            elif command[0].upper() == "COMMAND2":
-                self.command_executor.command2()
+                self.imgEditor = EditImage(self.imgPath)
 
-            elif command[0].upper() == "COMMAND_WITH_PARAMETER":
+                print("""
+A : zooms in on the original image. Zoomed image is enlarged segment between the last two doubleclicks of the user
+S : performs the zoom function on the zoomed image (works similar to A)
+D : displays the coordinates of the last two double clicks done on both the original image and the zoomed image
+F : changes the colour of the last pixel to be double clicked into the colour set by the user on the zoomed image
+G : same but for the last pixel double clicked on the original image
+H : changes colour the selected pixels will be transformed into. Enter RGB values separted by commas (default colour black)
+You can use CTRL + S to save the window""")
+                self.imgEditor.run()
+
+
+            elif command[0].upper() == "SET_PATH":
 
                 if len(command) != 2:
-                    raise Exception("Please enter COMMAND_WITH_PARAMETER followed by PARAMETER.")
+                    raise Exception("Please enter SET_PATH followed by the file path of the image you want to edit.")
 
-                self.command_executor.command_with_parameter(command[1])
+                self.imgPath = command[1]
+
+            elif command[0].upper() == "SAVE":
+                self.imgEditor.save()
+
 
             elif command[0].upper() == "HELP":
                 self._get_help()
@@ -37,9 +54,15 @@ class CommandParser:
     def _get_help(self):
         """Displays all available commands to the user."""
         help_text = """
-        Available commands:
-            COMMAND1 : description
-            COMMAND2 : description
-            ...
+Available commands:
+    RUN : opens the editing window, The following keybinds can be used to manipulate the window:
+        A : zooms in on the original image. Zoomed image is enlarged segment between the last two doubleclicks of the user
+        S : performs the zoom function on the zoomed image (works similar to A)
+        D : displays the coordinates of the last two double clicks done on both the original image and the zoomed image
+        F : changes the colour of the last pixel to be double clicked into the colour set by the user on the zoomed image
+        G : same but for the last pixel double clicked on the original image
+        H : changes colour the selected pixels will be transformed into. Enter RGB values separted by commas (default colour black)
+    SET_PATH : used to provide the path to the image to be edited.
+    SAVE : used to save the image at the same file location
         """
         print(help_text)
